@@ -23,6 +23,7 @@ import { correctText, type CorrectionResult } from "@/lib/gemini";
 import * as Diff from "diff";
 import { Fragment } from "react";
 import { clsx, type ClassValue } from "clsx";
+import ReactMarkdown from "react-markdown";
 import { twMerge } from "tailwind-merge";
 
 function cn(...inputs: ClassValue[]) {
@@ -417,15 +418,27 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-red-50/50 rounded-3xl border border-red-100 p-6 space-y-3"
+                  className="bg-white rounded-3xl border border-red-100 p-6 space-y-3 shadow-sm"
                 >
                   <div className="flex items-center gap-2 text-red-700 font-bold text-sm">
                     <AlertTriangle className="w-4 h-4" />
                     Mistake Analysis
                   </div>
-                  <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                    {output.mistakes}
-                  </p>
+                  <div className="text-base text-slate-700 leading-relaxed font-medium">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-4 last:mb-0 leading-7">{children}</p>,
+                        strong: ({ children }) => <span className="font-bold text-slate-800 bg-red-50/80 px-1 rounded">{children}</span>,
+                        code: ({ children }) => <span className="inline-block font-mono text-sm bg-red-100 text-red-800 px-1.5 py-0.5 rounded border border-red-200/50 mx-1 align-baseline">{children}</span>,
+                        ul: ({ children }) => <ul className="list-disc pl-5 mt-2 space-y-2">{children}</ul>,
+                        li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>
+                      }}
+                    >
+                      {typeof output.mistakes === 'object'
+                        ? JSON.stringify(output.mistakes, null, 2)
+                        : output.mistakes || ""}
+                    </ReactMarkdown>
+                  </div>
                 </motion.div>
 
                 {/* Card 3: Knowledge Drop */}
@@ -433,15 +446,27 @@ export default function Home() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-indigo-50/50 rounded-3xl border border-indigo-100 p-6 space-y-3"
+                  className="bg-white rounded-3xl border border-indigo-100 p-6 space-y-3 shadow-sm"
                 >
                   <div className="flex items-center gap-2 text-indigo-700 font-bold text-sm">
                     <BookOpen className="w-4 h-4" />
                     Knowledge Drop
                   </div>
-                  <p className="text-sm text-slate-700 leading-relaxed font-medium">
-                    {output.knowledge}
-                  </p>
+                  <div className="text-base text-slate-700 leading-relaxed font-medium">
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-4 last:mb-0 leading-7">{children}</p>,
+                        strong: ({ children }) => <span className="font-bold text-slate-800 bg-indigo-50/80 px-1 rounded">{children}</span>,
+                        code: ({ children }) => <span className="inline-block font-mono text-sm bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded border border-indigo-200/50 mx-1 align-baseline">{children}</span>,
+                        ul: ({ children }) => <ul className="list-disc pl-5 mt-2 space-y-2">{children}</ul>,
+                        li: ({ children }) => <li className="pl-1 leading-relaxed">{children}</li>
+                      }}
+                    >
+                      {typeof output.knowledge === 'object'
+                        ? JSON.stringify(output.knowledge, null, 2)
+                        : output.knowledge || ""}
+                    </ReactMarkdown>
+                  </div>
                 </motion.div>
 
               </div>
