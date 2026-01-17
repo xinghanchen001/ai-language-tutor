@@ -19,7 +19,8 @@ import {
   Filter,
   ArrowRight,
   Menu,
-  X // Added standard icons for mobile menu
+  X,
+  AlertCircle // Added standard icons for mobile menu
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -126,6 +127,7 @@ function MainContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Chat State
   const [currentCorrectionId, setCurrentCorrectionId] = useState<string | null>(null);
@@ -295,7 +297,7 @@ function MainContent() {
     const textToProcess = textOverride ?? input;
     const modeToUse = modeOverride ?? mode;
 
-    if (!textToProcess.trim() || loading) return;
+    if (typeof textToProcess !== 'string' || !textToProcess.trim() || loading) return;
 
     setLoading(true);
     setApiKeyMissing(false);
@@ -303,6 +305,7 @@ function MainContent() {
     setExplanationOutput(null);
     setChatMessages([]);
     setCurrentCorrectionId(null);
+    setErrorMessage(null);
 
     try {
       if (modeToUse === 'correction') {
@@ -367,6 +370,8 @@ function MainContent() {
       console.error("Processing error:", error);
       if (error.message.includes("API Key is missing")) {
         setApiKeyMissing(true);
+      } else {
+        setErrorMessage(error.message || "An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -742,7 +747,7 @@ function MainContent() {
                   </div>
                   <div className="flex justify-end pt-2">
                     <button
-                      onClick={handleCorrect}
+                      onClick={() => handleCorrect()}
                       disabled={!input.trim() || loading}
                       className={cn(
                         "group relative flex items-center gap-2 px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold transition-all duration-300 shadow-lg shadow-blue-200 hover:shadow-blue-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden w-full md:w-auto justify-center",
@@ -790,6 +795,22 @@ function MainContent() {
                     </button>
                   </div>
                 ) : null}
+
+                {/* General Error Message */}
+                {errorMessage && (
+                  <div className="bg-red-50 p-4 border-t border-red-100 flex items-center justify-between">
+                    <p className="text-sm text-red-600 font-medium flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      {errorMessage}
+                    </p>
+                    <button
+                      onClick={() => setErrorMessage(null)}
+                      className="text-xs bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Output Section */}

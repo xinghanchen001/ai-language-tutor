@@ -62,7 +62,13 @@ export async function correctText(text: string): Promise<CorrectionResult> {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    let resultText = response.text().trim();
+    const responseText = response.text();
+
+    if (typeof responseText !== 'string') {
+      throw new Error("Gemini returned non-string response");
+    }
+
+    let resultText = responseText.trim();
 
     // Cleanup if Gemini wraps in markdown code blocks
     if (resultText.startsWith("```json")) {
@@ -230,7 +236,13 @@ export async function explainText(text: string): Promise<ExplanationResult> {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    let resultText = response.text().trim();
+    const responseText = response.text();
+
+    if (typeof responseText !== 'string') {
+      throw new Error("Gemini returned non-string response");
+    }
+
+    let resultText = responseText.trim();
 
     // Cleanup json markdown
     if (resultText.startsWith("```json")) {
