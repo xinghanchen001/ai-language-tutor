@@ -10,6 +10,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "DeepL Language Corrector | Perfect Your English & German",
   description: "Advanced AI-powered grammar and style refinement for English and German text.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "DeepL Tutor",
+  },
 };
 
 export default function RootLayout({
