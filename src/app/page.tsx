@@ -115,7 +115,7 @@ function MainContent() {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState<CorrectionResult | null>(null);
   const [explanationOutput, setExplanationOutput] = useState<ExplanationResult | null>(null);
-  const [mode, setMode] = useState<'correction' | 'explanation'>('correction');
+  const [mode, setMode] = useState<'correction' | 'explanation'>('explanation');
   const [languageFilter, setLanguageFilter] = useState<'all' | 'en' | 'de'>('all');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -243,8 +243,10 @@ function MainContent() {
     }
   }, []);
 
-  // Removed the useEffect that auto-triggered on input/mode change to prevent unwanted execution on mode toggle
-
+  // Removed the useEffect that auto-triggered on input/mode change
+  // [x] Implement PWA Support (Manifest & Meta Tags)
+  // [x] Expand Header Toggle to fill available space
+  // [ ] Hide Header Logo and Text on Mobile
   const fetchHistory = async (isFirstPage = false) => {
     if (loadingMore || (!hasMore && !isFirstPage)) return;
 
@@ -494,20 +496,20 @@ function MainContent() {
     <main className="min-h-screen bg-[#F0F4F8] selection:bg-blue-100 flex flex-col">
       {/* Header */}
       <nav
-        className="bg-white border-b border-blue-100 px-4 md:px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm"
+        className="bg-white border-b border-blue-100 px-3 md:px-6 py-2 md:py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm"
         style={{ WebkitAppRegion: 'drag' } as any}
       >
         <div className="flex items-center gap-2 md:gap-4">
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg"
+            className="md:hidden p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg"
             style={{ WebkitAppRegion: 'no-drag' } as any}
           >
-            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-transparent rounded-xl flex items-center justify-center overflow-hidden">
+          <div className="hidden md:flex w-10 h-10 bg-transparent rounded-xl items-center justify-center overflow-hidden">
             <img
               src="./logo.png"
               alt="DeepL Corrector Logo"
@@ -515,13 +517,13 @@ function MainContent() {
               style={{ mixBlendMode: 'multiply' } as any}
             />
           </div>
-          <div>
-            <h1 className="text-lg md:text-xl font-bold text-blue-900 tracking-tight leading-none">DeepL <span className="text-blue-500 font-medium hidden sm:inline">Corrector</span></h1>
-            <p className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider hidden sm:block">AI Powered Linguistic Perfection</p>
+          <div className="hidden md:block">
+            <h1 className="text-xl font-bold text-blue-900 tracking-tight leading-none">DeepL <span className="text-blue-500 font-medium">Corrector</span></h1>
+            <p className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider block">AI Powered Linguistic Perfection</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end ml-4 md:ml-8">
+        <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end ml-0 md:ml-8">
           {/* Mode Toggle (Visible on desktop, condensed on mobile?) */}
           <div className="flex items-center bg-slate-100/50 p-1 rounded-lg border border-slate-200 flex-1 max-w-md">
             <button
@@ -537,7 +539,7 @@ function MainContent() {
                 }
               }}
               className={cn(
-                "px-2 md:px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all flex-1 text-center whitespace-nowrap",
+                "px-2 md:px-3 py-1.5 rounded-md text-xs md:text-sm font-bold transition-all flex-1 text-center whitespace-nowrap",
                 mode === 'correction'
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-slate-400 hover:text-slate-600"
@@ -559,7 +561,7 @@ function MainContent() {
                 }
               }}
               className={cn(
-                "px-2 md:px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all flex-1 text-center whitespace-nowrap",
+                "px-2 md:px-3 py-1.5 rounded-md text-xs md:text-sm font-bold transition-all flex-1 text-center whitespace-nowrap",
                 mode === 'explanation'
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-slate-400 hover:text-slate-600"
