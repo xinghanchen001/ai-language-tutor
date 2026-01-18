@@ -117,7 +117,14 @@ export default function OutputDisplay({
                 {mode === 'explanation' && explanationOutput && (
                     <div className="space-y-6">
                         {explanationOutput.sentences.map((sentence, index) => (
-                            <AnnotatedSentence key={index} sentence={sentence} index={index} />
+                            <AnnotatedSentence
+                                key={index}
+                                sentence={sentence.text}
+                                annotations={sentence.annotations}
+                                sentenceIndex={index}
+                                simplifiedExpression={sentence.simplifiedExpression}
+                                teacherComment={sentence.teacherComment}
+                            />
                         ))}
                     </div>
                 )}
