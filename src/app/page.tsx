@@ -521,9 +521,9 @@ function MainContent() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-4 ml-auto">
+        <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end ml-4 md:ml-8">
           {/* Mode Toggle (Visible on desktop, condensed on mobile?) */}
-          <div className="flex items-center bg-slate-100/50 p-1 rounded-lg border border-slate-200">
+          <div className="flex items-center bg-slate-100/50 p-1 rounded-lg border border-slate-200 flex-1 max-w-md">
             <button
               onClick={() => {
                 if (mode !== 'correction') {
@@ -531,10 +531,13 @@ function MainContent() {
                   setInput('');
                   setOutput(null);
                   setExplanationOutput(null);
+                  setChatMessages([]);
+                  setCurrentCorrectionId(null);
+                  setErrorMessage(null);
                 }
               }}
               className={cn(
-                "px-2 md:px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all",
+                "px-2 md:px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all flex-1 text-center whitespace-nowrap",
                 mode === 'correction'
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-slate-400 hover:text-slate-600"
@@ -550,10 +553,13 @@ function MainContent() {
                   setInput('');
                   setOutput(null);
                   setExplanationOutput(null);
+                  setChatMessages([]);
+                  setCurrentCorrectionId(null);
+                  setErrorMessage(null);
                 }
               }}
               className={cn(
-                "px-2 md:px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all",
+                "px-2 md:px-3 py-1.5 rounded-md text-[10px] md:text-xs font-bold transition-all flex-1 text-center whitespace-nowrap",
                 mode === 'explanation'
                   ? "bg-white text-blue-600 shadow-sm"
                   : "text-slate-400 hover:text-slate-600"
