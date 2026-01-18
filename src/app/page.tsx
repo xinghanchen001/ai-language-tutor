@@ -496,14 +496,14 @@ function MainContent() {
     <main className="min-h-screen bg-[#F0F4F8] selection:bg-blue-100 flex flex-col">
       {/* Header */}
       <nav
-        className="bg-white border-b border-blue-100 px-3 md:px-6 py-2 md:py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm"
+        className="bg-[#031830] border-b border-blue-900 px-3 md:px-6 py-2 md:py-4 flex items-center justify-between sticky top-0 z-50 shadow-md"
         style={{ WebkitAppRegion: 'drag' } as any}
       >
         <div className="flex items-center gap-2 md:gap-4">
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg"
+            className="md:hidden p-1.5 text-blue-300 hover:bg-blue-900 hover:text-white rounded-lg transition-colors"
             style={{ WebkitAppRegion: 'no-drag' } as any}
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -518,14 +518,14 @@ function MainContent() {
             />
           </div>
           <div className="hidden md:block">
-            <h1 className="text-xl font-bold text-blue-900 tracking-tight leading-none">DeepL <span className="text-blue-500 font-medium">Corrector</span></h1>
-            <p className="text-[10px] text-blue-400 font-semibold uppercase tracking-wider block">AI Powered Linguistic Perfection</p>
+            <h1 className="text-xl font-bold text-white tracking-tight leading-none">DeepL <span className="text-blue-400 font-medium">Corrector</span></h1>
+            <p className="text-[10px] text-blue-300/80 font-semibold uppercase tracking-wider block">AI Powered Linguistic Perfection</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 md:gap-4 flex-1 justify-end ml-0 md:ml-8">
           {/* Mode Toggle (Visible on desktop, condensed on mobile?) */}
-          <div className="flex items-center bg-slate-100/50 p-1 rounded-lg border border-slate-200 flex-1 max-w-md">
+          <div className="flex items-center bg-blue-900/40 p-1 rounded-lg border border-blue-800/50 flex-1 max-w-md shadow-inner">
             <button
               onClick={() => {
                 if (mode !== 'correction') {
@@ -541,8 +541,8 @@ function MainContent() {
               className={cn(
                 "px-2 md:px-3 py-1.5 rounded-md text-xs md:text-sm font-bold transition-all flex-1 text-center whitespace-nowrap",
                 mode === 'correction'
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-slate-400 hover:text-slate-600"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-blue-300 hover:text-blue-100 hover:bg-blue-800/50"
               )}
               style={{ WebkitAppRegion: 'no-drag' } as any}
             >
@@ -563,8 +563,8 @@ function MainContent() {
               className={cn(
                 "px-2 md:px-3 py-1.5 rounded-md text-xs md:text-sm font-bold transition-all flex-1 text-center whitespace-nowrap",
                 mode === 'explanation'
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-slate-400 hover:text-slate-600"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-blue-300 hover:text-blue-100 hover:bg-blue-800/50"
               )}
               style={{ WebkitAppRegion: 'no-drag' } as any}
             >
@@ -578,8 +578,8 @@ function MainContent() {
             className={cn(
               "hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border",
               autoPasteEnabled
-                ? "bg-blue-100 text-blue-700 border-blue-200"
-                : "bg-white text-slate-500 border-slate-200 hover:border-blue-200 hover:text-blue-500"
+                ? "bg-blue-500/20 text-blue-300 border-blue-500/30"
+                : "bg-blue-900/30 text-blue-400 border-blue-800/50 hover:border-blue-700 hover:text-blue-200"
             )}
             style={{ WebkitAppRegion: 'no-drag' } as any}
           >
@@ -587,7 +587,7 @@ function MainContent() {
             <span className="hidden lg:inline">Auto-Paste</span>
             <div className={cn(
               "w-2 h-2 rounded-full transition-colors",
-              autoPasteEnabled ? "bg-green-500" : "bg-slate-300"
+              autoPasteEnabled ? "bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]" : "bg-blue-800"
             )} />
           </button>
 
@@ -598,7 +598,7 @@ function MainContent() {
               setOutput(null);
               if (typeof window !== 'undefined' && window.electron) window.electron.hideWindow();
             }}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-50 text-red-400 hover:bg-red-500 hover:text-white transition-all border border-transparent hover:border-red-600"
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all border border-transparent hover:border-red-500/50"
             style={{ WebkitAppRegion: 'no-drag' } as any}
             title="Close and Reset"
           >
