@@ -13,6 +13,7 @@ export interface CorrectionResult {
   mistakes: string;
   knowledge: string;
   detectedLanguage: 'en' | 'de';
+  original: string;
 }
 
 export async function correctText(text: string): Promise<CorrectionResult> {
@@ -78,6 +79,7 @@ export async function correctText(text: string): Promise<CorrectionResult> {
     }
 
     const parsed = JSON.parse(resultText) as CorrectionResult;
+    parsed.original = text;
     console.log("Correction successful!");
     return parsed;
   } catch (error) {

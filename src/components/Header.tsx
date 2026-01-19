@@ -19,7 +19,8 @@ export default function Header({
     setIsMobileMenuOpen,
     autoPasteEnabled,
     setAutoPasteEnabled,
-    resetApp
+    resetApp,
+    onReset
 }: HeaderProps) {
     return (
         <nav

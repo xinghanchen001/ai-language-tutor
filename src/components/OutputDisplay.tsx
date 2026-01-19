@@ -25,6 +25,7 @@ export default function OutputDisplay({
 }: OutputDisplayProps) {
 
     const renderDiff = (original: string, corrected: string) => {
+        if (!original || !corrected) return <span className="text-slate-700">{corrected || original || ""}</span>;
         const diff = Diff.diffWords(original, corrected);
         return diff.map((part, index) => (
             <Fragment key={index}>
