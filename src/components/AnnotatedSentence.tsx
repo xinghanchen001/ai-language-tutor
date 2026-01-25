@@ -58,21 +58,75 @@ function renderAnnotatedText(
         return <span>{text}</span>;
     }
 
-    const sorted = [...annotations].sort((a, b) => a.start - b.start);
+    // 1. Verify and repair indices
+    // LLMs often return incorrect indices, so we find the text ourselves.
+    const validatedAnnotations = annotations.map((ann, originalIdx) => {
+        const currentSlice = text.slice(ann.start, ann.end);
+        if (currentSlice === ann.text) {
+            return { ...ann, originalIdx };
+        }
+
+        // Indices are likely wrong. Find all occurrences of ann.text in text.
+        const matches: number[] = [];
+        let pos = text.indexOf(ann.text);
+        while (pos !== -1) {
+            matches.push(pos);
+            pos = text.indexOf(ann.text, pos + 1);
+        }
+
+        if (matches.length === 0) {
+            // Try matching trimmed text
+            const trimmed = ann.text.trim();
+            const trimmedPos = text.indexOf(trimmed);
+            if (trimmedPos !== -1) {
+                return {
+                    ...ann,
+                    start: trimmedPos,
+                    end: trimmedPos + trimmed.length,
+                    text: trimmed,
+                    originalIdx
+                };
+            }
+            return null; // Text definitely not found
+        }
+
+        // Find match closest to original provided start to imply context
+        const closestStart = matches.reduce((prev, curr) => {
+            return (Math.abs(curr - ann.start) < Math.abs(prev - ann.start) ? curr : prev);
+        });
+
+        return {
+            ...ann,
+            start: closestStart,
+            end: closestStart + ann.text.length,
+            originalIdx
+        };
+    }).filter((a): a is Annotation & { originalIdx: number } => a !== null);
+
+    // 2. Sort by start position
+    const sorted = [...validatedAnnotations].sort((a, b) => a.start - b.start);
+
     const parts: React.ReactElement[] = [];
     let lastIndex = 0;
 
-    sorted.forEach((annotation, idx) => {
+    sorted.forEach((annotation) => {
+        // Skip overlapping annotations to avoid text duplication
+        if (annotation.start < lastIndex) {
+            return;
+        }
+
+        // Add plain text before this annotation
         if (annotation.start > lastIndex) {
             parts.push(
-                <span key={`text-${idx}`}>{text.slice(lastIndex, annotation.start)}</span>
+                <span key={`text-before-${annotation.originalIdx}`}>{text.slice(lastIndex, annotation.start)}</span>
             );
         }
 
+        // Add the annotation mark
         parts.push(
             <mark
-                key={`annotation-${idx}`}
-                onClick={() => onAnnotationClick(idx)}
+                key={`annotation-${annotation.originalIdx}`}
+                onClick={() => onAnnotationClick(annotation.originalIdx)}
                 className={cn(
                     "cursor-pointer rounded-sm px-0.5 transition-all",
                     getAnnotationColor(annotation.type)
@@ -85,6 +139,7 @@ function renderAnnotatedText(
         lastIndex = annotation.end;
     });
 
+    // Add remaining plain text
     if (lastIndex < text.length) {
         parts.push(<span key="text-end">{text.slice(lastIndex)}</span>);
     }
@@ -141,7 +196,7 @@ export default function AnnotatedSentence({
                                 </div>
                             </div>
 
-                            <p className="text-sm text-slate-700 leading-relaxed mb-3">
+                            <p className="text-lg leading-relaxed text-slate-700 font-medium mb-3">
                                 {annotations[expandedAnnotation].explanation}
                             </p>
 
@@ -150,7 +205,7 @@ export default function AnnotatedSentence({
                                     <p className="text-xs font-bold text-slate-600 mb-2">Examples:</p>
                                     <ul className="space-y-1">
                                         {annotations[expandedAnnotation].examples!.map((example, idx) => (
-                                            <li key={idx} className="text-sm text-slate-600 flex items-start gap-2">
+                                            <li key={idx} className="text-lg text-slate-600 flex items-start gap-2">
                                                 <span className="text-blue-400 mt-0.5">•</span>
                                                 <span className="flex-1">{example}</span>
                                             </li>
@@ -165,9 +220,9 @@ export default function AnnotatedSentence({
 
             {/* Simplified Expression */}
             {simplifiedExpression && (
-                <div className="mt-3 bg-green-50 rounded-xl p-4 border border-green-100">
-                    <p className="text-xs font-bold text-green-700 mb-2">💡 Simpler way to say it:</p>
-                    <p className="text-sm text-green-800 leading-relaxed italic">
+                <div className="mt-3 bg-slate-50 rounded-xl p-4 border border-slate-100 flex gap-3 items-start">
+                    <span className="text-xl flex-shrink-0 mt-0.5">💡</span>
+                    <p className="text-lg leading-relaxed text-slate-700 font-medium italic">
                         {simplifiedExpression}
                     </p>
                 </div>
@@ -175,9 +230,9 @@ export default function AnnotatedSentence({
 
             {/* Teacher Comment */}
             {teacherComment && (
-                <div className="mt-3 bg-amber-50 rounded-xl p-4 border border-amber-100">
-                    <p className="text-xs font-bold text-amber-700 mb-2">👨‍🏫 Teacher's Note:</p>
-                    <p className="text-sm text-amber-800 leading-relaxed">
+                <div className="mt-3 bg-slate-50 rounded-xl p-4 border border-slate-100 flex gap-3 items-start">
+                    <span className="text-xl flex-shrink-0 mt-0.5">👨‍🏫</span>
+                    <p className="text-lg leading-relaxed text-slate-700 font-medium">
                         {teacherComment}
                     </p>
                 </div>

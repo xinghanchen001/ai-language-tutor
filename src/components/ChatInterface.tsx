@@ -37,26 +37,20 @@ export default function ChatInterface({
         }
     };
 
+    const hasMessages = messages.length > 0;
+
     if (disabled && messages.length === 0) return null;
 
     return (
-        <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 border border-white overflow-hidden flex flex-col h-[500px] md:h-auto">
-            <div className="bg-blue-50/50 p-4 border-b border-blue-100 flex items-center justify-between sticky top-0 z-10">
-                <label className="text-sm font-bold text-blue-900 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-blue-500" />
-                    Ask Follow-up Questions
-                </label>
-                <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-bold">Beta</span>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/30">
-                {messages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-400 space-y-2 opacity-50">
-                        <Sparkles className="w-8 h-8" />
-                        <p className="text-sm font-medium">Ask about grammar, alternatives, or tone...</p>
-                    </div>
-                ) : (
-                    messages.map((msg, i) => (
+        <div className={cn(
+            "flex flex-col transition-all duration-300",
+            hasMessages
+                ? "h-[500px] md:h-auto"
+                : "h-auto"
+        )}>
+            {hasMessages && (
+                <div className="flex-1 overflow-y-auto py-4 space-y-4 custom-scrollbar">
+                    {messages.map((msg, i) => (
                         <div key={i} className={cn("flex gap-3", msg.role === 'user' ? "flex-row-reverse" : "flex-row")}>
                             <div className={cn(
                                 "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm",
@@ -73,20 +67,26 @@ export default function ChatInterface({
                                 {msg.role === 'model' ? <ReactMarkdown>{msg.content}</ReactMarkdown> : msg.content}
                             </div>
                         </div>
-                    ))
-                )}
-                <div ref={chatBottomRef} />
-            </div>
+                    ))}
+                    <div ref={chatBottomRef} />
+                </div>
+            )}
 
-            <div className="p-4 bg-white border-t border-slate-100">
+            <div className={cn(
+                "transition-all duration-300",
+                hasMessages ? "pt-2 pb-4" : "pt-4"
+            )}>
                 <div className="relative flex items-end gap-2">
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder={disabled ? "Select a correction to start chatting" : "Ask a follow-up question..."}
+                        placeholder={disabled ? "Select a correction to start chatting" : (hasMessages ? "Ask a follow-up question..." : "Ask a follow-up question about the text...")}
                         disabled={disabled}
-                        className="w-full bg-slate-50 border-transparent focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-500/10 rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 placeholder:text-slate-400 resize-none min-h-[50px] max-h-[120px] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={cn(
+                            "w-full bg-slate-50 border-transparent focus:border-blue-200 focus:bg-white focus:ring-4 focus:ring-blue-500/10 rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 placeholder:text-slate-400 resize-none transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm",
+                            hasMessages ? "min-h-[50px] max-h-[120px]" : "min-h-[50px] h-[50px]"
+                        )}
                         rows={1}
                     />
                     <button

@@ -404,29 +404,33 @@ function MainContent() {
         />
 
         <div className="flex-1 w-full min-h-[calc(100vh-73px)]">
-          <div className="max-w-6xl mx-auto px-8 py-10 space-y-8">
+          <div className="max-w-6xl mx-auto px-4 md:px-8 py-10 space-y-8">
             <div className={cn(
               "grid grid-cols-1 gap-6 transition-all duration-300",
               (output || explanationOutput) ? "md:grid-cols-2" : "md:grid-cols-1"
             )}>
-              <InputArea
-                input={input}
-                setInput={setInput}
-                handleCorrect={handleCorrect}
-                loading={loading}
-                showAutoPasteToast={showAutoPasteToast}
-                apiKeyMissing={apiKeyMissing}
-                setApiKeyMissing={setApiKeyMissing}
-              />
+              <div className="order-2 md:order-1 h-full">
+                <InputArea
+                  input={input}
+                  setInput={setInput}
+                  handleCorrect={handleCorrect}
+                  loading={loading}
+                  showAutoPasteToast={showAutoPasteToast}
+                  apiKeyMissing={apiKeyMissing}
+                  setApiKeyMissing={setApiKeyMissing}
+                />
+              </div>
 
-              <OutputDisplay
-                mode={mode}
-                output={output}
-                explanationOutput={explanationOutput}
-                copyToClipboard={copyToClipboard}
-                copied={copied}
-                onRetry={() => handleCorrect()}
-              />
+              <div className="order-1 md:order-2 h-full">
+                <OutputDisplay
+                  mode={mode}
+                  output={output}
+                  explanationOutput={explanationOutput}
+                  copyToClipboard={copyToClipboard}
+                  copied={copied}
+                  onRetry={() => handleCorrect()}
+                />
+              </div>
             </div>
 
             {(output || explanationOutput) && (

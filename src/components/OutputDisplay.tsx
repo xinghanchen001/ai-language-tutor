@@ -75,7 +75,7 @@ export default function OutputDisplay({
                 </div>
             </div>
 
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1 relative">
+            <div className="p-4 md:p-6 overflow-y-auto custom-scrollbar flex-1 relative">
                 {mode === 'correction' && output && (
                     <div className="prose prose-slate max-w-none">
                         <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mb-6 leading-relaxed text-lg">
