@@ -8,9 +8,27 @@ const modelName = process.env.VERTEX_AI_MODEL || "gemini-2.5-flash";
 // Support both:
 // - Local/Electron: GOOGLE_APPLICATION_CREDENTIALS file
 // - Vercel: GCP_CREDENTIALS env var (base64-encoded service account JSON)
-const googleAuthOptions = process.env.GCP_CREDENTIALS
-  ? { credentials: JSON.parse(Buffer.from(process.env.GCP_CREDENTIALS, "base64").toString()) }
-  : {};
+function getAuthOptions() {
+  if (process.env.GCP_CREDENTIALS) {
+    try {
+      const decoded = Buffer.from(process.env.GCP_CREDENTIALS, "base64").toString();
+      const credentials = JSON.parse(decoded);
+      console.log(`[Vertex AI] Using GCP_CREDENTIALS env var (client: ${credentials.client_email})`);
+      return { credentials };
+    } catch (e) {
+      console.error("[Vertex AI] Failed to parse GCP_CREDENTIALS:", e);
+      return {};
+    }
+  }
+  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+    console.log(`[Vertex AI] Using GOOGLE_APPLICATION_CREDENTIALS file: ${process.env.GOOGLE_APPLICATION_CREDENTIALS}`);
+  } else {
+    console.warn("[Vertex AI] No credentials found. Set GCP_CREDENTIALS (Vercel) or GOOGLE_APPLICATION_CREDENTIALS (local).");
+  }
+  return {};
+}
+
+const googleAuthOptions = getAuthOptions();
 
 const vertexAI = new VertexAI({ project: projectId, location, googleAuthOptions });
 
