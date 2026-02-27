@@ -58,22 +58,22 @@ export default function HistorySidebar({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 md:hidden"
+                        className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30"
                     />
                 )}
             </AnimatePresence>
 
             <aside className={cn(
-                "fixed inset-y-0 left-0 bg-white border-r border-blue-100 flex flex-col z-40 transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:w-80 md:h-[calc(100vh-73px)] shadow-2xl md:shadow-none",
-                isOpen ? "translate-x-0 w-[85vw]" : "-translate-x-full w-80"
+                "fixed inset-y-0 left-0 bg-white border-r border-blue-100 flex flex-col z-40 transition-transform duration-300 ease-in-out shadow-2xl",
+                isOpen ? "translate-x-0 w-[85vw] md:w-80" : "-translate-x-full w-[85vw] md:w-80"
             )}>
-                <div className="p-4 md:p-6 border-b border-blue-50 bg-white z-10 sticky top-0 space-y-4 pt- safe-top">
+                <div className="p-4 md:p-6 border-b border-blue-50 bg-white z-10 sticky top-0 space-y-4 pt-safe-top">
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-bold text-blue-900 flex items-center gap-2">
                             <History className="w-5 h-5 text-blue-400" />
                             History
                         </h2>
-                        <button onClick={onClose} className="md:hidden p-1 text-slate-400"><X className="w-5 h-5" /></button>
+                        <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600"><X className="w-5 h-5" /></button>
                     </div>
 
                     <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-100 w-full">

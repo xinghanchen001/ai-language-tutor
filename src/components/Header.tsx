@@ -31,7 +31,7 @@ export default function Header({
                 {/* Mobile Menu Button */}
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="md:hidden p-1.5 text-blue-300 hover:bg-blue-900 hover:text-white rounded-lg transition-colors"
+                    className="p-1.5 text-blue-300 hover:bg-blue-900 hover:text-white rounded-lg transition-colors"
                     style={{ WebkitAppRegion: 'no-drag' } as any}
                 >
                     {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

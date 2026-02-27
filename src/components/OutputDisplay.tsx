@@ -4,6 +4,7 @@ import * as Diff from "diff";
 import { cn } from "@/lib/utils";
 import AnnotatedSentence from "@/components/AnnotatedSentence";
 import { Fragment } from "react";
+import ReactMarkdown from "react-markdown";
 import type { CorrectionResult, ExplanationResult } from "@/types/gemini";
 
 interface OutputDisplayProps {
@@ -82,34 +83,24 @@ export default function OutputDisplay({
                             {renderDiff(output.original, output.corrected)}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 gap-6">
                             <div className="bg-red-50/50 p-5 rounded-2xl border border-red-50">
                                 <h3 className="text-xs font-black text-red-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
                                     Mistakes Found
                                 </h3>
-                                <ul className="space-y-2">
-                                    {output.mistakes.split('\n').map((mistake, i) => (
-                                        <li key={i} className="text-sm text-slate-600 flex gap-2">
-                                            <span className="text-red-400 font-bold">•</span>
-                                            {mistake.replace(/^- /, '')}
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className="correction-markdown text-sm text-slate-600">
+                                    <ReactMarkdown>{output.mistakes}</ReactMarkdown>
+                                </div>
                             </div>
                             <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-50">
                                 <h3 className="text-xs font-black text-blue-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                                     <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
                                     Key Improvements
                                 </h3>
-                                <ul className="space-y-2">
-                                    {output.knowledge.split('\n').map((point, i) => (
-                                        <li key={i} className="text-sm text-slate-600 flex gap-2">
-                                            <span className="text-blue-400 font-bold">•</span>
-                                            {point.replace(/^- /, '')}
-                                        </li>
-                                    ))}
-                                </ul>
+                                <div className="correction-markdown text-sm text-slate-600">
+                                    <ReactMarkdown>{output.knowledge}</ReactMarkdown>
+                                </div>
                             </div>
                         </div>
                     </div>
