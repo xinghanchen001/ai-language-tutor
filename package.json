@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "electron": "electron .",
-    "dist": "npm run build && electron-builder"
+    "dist": "electron-builder"
   },
   "build": {
     "appId": "com.hanchen.deeplcorrector",
@@ -20,10 +20,8 @@
       "output": "dist_electron"
     },
     "files": [
-      "out/**/*",
       "electron/**/*",
-      "package.json",
-      "node_modules/**/*"
+      "package.json"
     ],
     "mac": {
       "category": "public.app-category.productivity",
@@ -33,7 +31,7 @@
     "npmRebuild": false
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
+    "@google-cloud/vertexai": "^1.10.0",
     "@types/diff": "^7.0.2",
     "clsx": "^2.1.1",
     "diff": "^8.0.3",

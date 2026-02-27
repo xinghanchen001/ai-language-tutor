@@ -24,7 +24,7 @@ import {
   chatWithAI,
   ExplanationResult,
   explainText,
-} from "@/lib/gemini";
+} from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { CorrectionEntry, ExplanationEntry, ChatMessage } from "@/types";
 

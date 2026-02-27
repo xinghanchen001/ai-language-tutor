@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { Annotation } from "@/lib/gemini";
+import type { Annotation } from "@/types/gemini";
 import { BookOpen, Lightbulb, Sparkles, MessageSquare } from "lucide-react";
 
 function cn(...inputs: ClassValue[]) {

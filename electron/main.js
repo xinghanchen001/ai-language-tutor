@@ -4,6 +4,7 @@ const { exec } = require('child_process');
 const isDev = !app.isPackaged;
 
 let mainWindow;
+const PRODUCTION_URL = 'https://ai-language-tutor-six.vercel.app';
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -24,7 +25,7 @@ function createWindow() {
     if (isDev) {
         mainWindow.loadURL('http://localhost:3000');
     } else {
-        mainWindow.loadFile(path.join(__dirname, '../out/index.html'));
+        mainWindow.loadURL(PRODUCTION_URL);
     }
 
     // mainWindow.on('blur', () => {

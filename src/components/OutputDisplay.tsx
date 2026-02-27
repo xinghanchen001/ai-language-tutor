@@ -4,7 +4,7 @@ import * as Diff from "diff";
 import { cn } from "@/lib/utils";
 import AnnotatedSentence from "@/components/AnnotatedSentence";
 import { Fragment } from "react";
-import { CorrectionResult, ExplanationResult } from "@/lib/gemini";
+import type { CorrectionResult, ExplanationResult } from "@/types/gemini";
 
 interface OutputDisplayProps {
     mode: 'correction' | 'explanation';
