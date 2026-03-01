@@ -2,9 +2,9 @@
 
 ## Overview
 
-DeepL Corrector is a language learning tool that provides **text correction** and **text explanation** for German/English. It runs as both a **Next.js web app** and an **Electron desktop app** with global shortcuts.
+DeepL Corrector is a language learning tool that provides **text correction**, **text explanation**, and **real-time live video tutoring** for German/English. It runs as both a **Next.js web app** and an **Electron desktop app** with global shortcuts.
 
-All AI calls go through **Google Cloud Vertex AI** (server-side). No API keys are exposed to the browser.
+All AI calls go through **Google Cloud Vertex AI** (server-side). No API keys are exposed to the browser. The live tutoring feature uses a **WebSocket proxy on Cloud Run** to connect to the Gemini Multimodal Live API.
 
 ---
 
@@ -17,18 +17,24 @@ deepl/
 │   ├── main.js                     # Main process, shortcuts, loads Vercel URL
 │   └── preload.js                  # IPC bridge (contextIsolation)
 │
+├── public/
+│   ├── mic-processor.js            # AudioWorklet: mic capture, downsample to 16kHz PCM
+│   └── pcm-processor.js            # AudioWorklet: AI voice playback queue
+│
 ├── src/
 │   ├── app/                        # Next.js App Router
-│   │   ├── api/                    # Server-side API routes (Vertex AI calls)
+│   │   ├── api/                    # Server-side API routes
 │   │   │   ├── correct/route.ts    # POST /api/correct
 │   │   │   ├── explain/route.ts    # POST /api/explain
-│   │   │   └── chat/route.ts       # POST /api/chat
-│   │   ├── page.tsx                # Main page (client component)
+│   │   │   ├── chat/route.ts       # POST /api/chat
+│   │   │   └── live-token/route.ts # POST /api/live-token (proxy URL + project config)
+│   │   ├── page.tsx                # Main page (text correction/explanation)
+│   │   ├── live/page.tsx           # Live Tutor page (real-time video chat)
 │   │   ├── layout.tsx              # Root layout
 │   │   └── globals.css             # Tailwind styles
 │   │
 │   ├── components/                 # React UI components
-│   │   ├── Header.tsx              # App header, mode toggle
+│   │   ├── Header.tsx              # App header, mode toggle, Live nav link
 │   │   ├── InputArea.tsx           # Text input with auto-paste
 │   │   ├── OutputDisplay.tsx       # Correction diff / explanation display
 │   │   ├── AnnotatedSentence.tsx   # Word-level annotation highlights
@@ -37,6 +43,8 @@ deepl/
 │   │
 │   ├── lib/
 │   │   ├── gemini.ts               # Vertex AI client (SERVER-SIDE ONLY)
+│   │   ├── gemini-live.ts          # Gemini Live WebSocket client + MicrophoneCapture
+│   │   ├── audio-playback.ts       # AI voice playback (AudioWorklet, 24kHz→native resample)
 │   │   ├── api-client.ts           # Client-side fetch wrapper for /api routes
 │   │   ├── firebase.ts             # Firebase/Firestore config
 │   │   └── utils.ts                # Utility functions
@@ -48,6 +56,7 @@ deepl/
 ├── .gcloud/                        # GCP service account (gitignored)
 │   └── service-account.json
 ├── .env.local                      # Environment variables (gitignored)
+├── vercel.json                     # Vercel config (region: fra1)
 ├── next.config.ts                  # Next.js config
 ├── package.json                    # Dependencies & Electron builder config
 └── firebase.json                   # Firebase project config
@@ -55,7 +64,7 @@ deepl/
 
 ---
 
-## Two Core Features
+## Three Core Features
 
 ### 1. Text Correction (`/api/correct`)
 
@@ -99,6 +108,57 @@ User types text → Browser calls POST /api/explain
 ### 3. Follow-up Chat (`/api/chat`)
 
 After a correction or explanation, users can ask follow-up questions about grammar rules, vocabulary, etc.
+
+### 4. Live Video Tutor (`/live`)
+
+Real-time video chat with a Gemini AI language teacher. The AI sees what the user shows via camera, hears them speak, and responds with voice + text transcripts. It describes objects with vocabulary/adjectives and corrects grammar, vocabulary, and pronunciation.
+
+**Model:** `gemini-live-2.5-flash-native-audio` (Gemini Multimodal Live API)
+
+**Flow:**
+```
+Browser (/live)
+  ├── POST /api/live-token → gets proxy URL + project config
+  ├── WebSocket → hx-core Cloud Run proxy → Vertex AI Multimodal Live API
+  ├── Camera frames: 1 FPS, 640x480 JPEG (quality 0.5) → sent as base64
+  ├── Mic audio: 16kHz mono Int16 PCM → sent as base64 (via AudioWorklet)
+  └── AI audio: 24kHz Int16 PCM → resampled to native rate → AudioWorklet playback
+```
+
+**Architecture (WebSocket proxy):**
+```
+Browser                    Cloud Run (europe-west3)          Vertex AI (us-central1)
+┌──────────┐  WebSocket    ┌─────────────────────┐  WebSocket  ┌───────────────────────┐
+│ /live    │──────────────→│ hx-core proxy       │────────────→│ Gemini Live API       │
+│ page.tsx │←──────────────│ (FastAPI + uvicorn)  │←────────────│ BidiGenerateContent   │
+│          │  audio/video  │ Adds Authorization   │  audio/text │ gemini-live-2.5-flash │
+└──────────┘   + text      │ header from IAM      │             │ -native-audio         │
+                           └─────────────────────┘             └───────────────────────┘
+```
+
+**Why a WebSocket proxy?** Browsers cannot set custom headers (like `Authorization: Bearer`) on WebSocket connections. The hx-core Cloud Run service acts as a transparent proxy, adding the GCP auth token to the upstream Vertex AI WebSocket.
+
+**Key components:**
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| Live page | `src/app/live/page.tsx` | UI: camera preview, controls, transcript |
+| WebSocket client | `src/lib/gemini-live.ts` | `GeminiLiveClient` + `MicrophoneCapture` classes |
+| Audio playback | `src/lib/audio-playback.ts` | `AudioPlaybackManager` — AI voice via AudioWorklet |
+| Mic processor | `public/mic-processor.js` | AudioWorklet: downsample native→16kHz, Float32→Int16 |
+| PCM processor | `public/pcm-processor.js` | AudioWorklet: queued playback of AI voice chunks |
+| Config endpoint | `src/app/api/live-token/route.ts` | Returns proxy URL, project ID, location |
+
+**Features:**
+- EN/DE language toggle (reconnects session with new system prompt)
+- Mic mute/unmute
+- Screen sharing (desktop/Android only — not supported on iOS)
+- Camera flip (front/rear)
+- Barge-in: user can interrupt AI mid-speech (audio buffer clears instantly)
+- Input + output transcription (word-by-word streaming)
+- Auto-reconnect with exponential backoff (max 3 retries)
+- Mobile: draggable transcript overlay (touch drag to resize 10-80vh)
+- Responsive layout: 70/30 video/transcript split on desktop, overlay on mobile
 
 ---
 
@@ -159,10 +219,15 @@ Vertex AI uses **GCP service account** authentication, not API keys. The code su
 ### Local Environment (.env.local)
 
 ```
+# Vertex AI (text correction/explanation)
 GCP_PROJECT_ID=hx-core-488120
 GCP_LOCATION=europe-west4
 VERTEX_AI_MODEL=gemini-2.0-flash
 GOOGLE_APPLICATION_CREDENTIALS=.gcloud/service-account.json
+
+# Live Tutor (WebSocket proxy)
+LIVE_PROXY_URL=wss://hx-core-xxxxx.europe-west3.run.app/v1/live-proxy
+LIVE_PROXY_LOCATION=us-central1
 ```
 
 The service account JSON file is shared with the hx-core project (symlinked).
@@ -201,17 +266,20 @@ The web app is hosted on **Vercel** at: https://ai-language-tutor-six.vercel.app
 ### Architecture
 
 ```
-                  Vercel (fra1)                     Google Cloud (europe-west4)
+                  Vercel (fra1)                     Google Cloud
                     ┌─────────────────────┐         ┌─────────────────────────┐
                     │                     │         │                         │
 Browser ── HTTPS ──→│  Next.js (Vercel)   │── SDK ─→│  Vertex AI              │
                     │  ├── Static pages   │         │  gemini-2.0-flash       │
-                    │  └── API routes     │         │                         │
-                    │     (serverless)    │         └─────────────────────────┘
-                    └─────────────────────┘
-                              ↑
-                    GCP_CREDENTIALS env var
-                    (base64-encoded service account)
+                    │  ├── /live page     │         │  (europe-west4)         │
+                    │  └── API routes     │         └─────────────────────────┘
+                    │     (serverless)    │
+                    └────────┬────────────┘         ┌─────────────────────────┐
+                             │                      │                         │
+Browser ── WebSocket ───────────────────────────────│  hx-core Cloud Run      │
+                             │                      │  (europe-west3)         │
+                    GCP_CREDENTIALS env var          │  ↕ Vertex AI Live API   │
+                    (base64-encoded service account) └─────────────────────────┘
 ```
 
 ### Vercel Environment Variables
@@ -224,6 +292,8 @@ Set these in **Vercel Dashboard → Settings → Environment Variables**:
 | `GCP_LOCATION` | `europe-west4` | Vertex AI region (Netherlands) |
 | `VERTEX_AI_MODEL` | `gemini-2.0-flash` | Model name |
 | `GCP_CREDENTIALS` | `(base64 string)` | Service account JSON, base64-encoded |
+| `LIVE_PROXY_URL` | `wss://hx-core-xxxxx.europe-west3.run.app/v1/live-proxy` | hx-core Cloud Run WebSocket proxy |
+| `LIVE_PROXY_LOCATION` | `us-central1` | Vertex AI region for Live API |
 
 **How to generate `GCP_CREDENTIALS`:**
 
@@ -261,6 +331,7 @@ In production, the Electron app is a thin shell — it just opens the Vercel-hos
 
 ## Data Flow Summary
 
+### Text Correction / Explanation
 ```
 ┌─────────────┐     fetch()      ┌──────────────────┐     SDK      ┌────────────┐
 │   Browser    │ ──────────────→ │  API Routes       │ ──────────→ │ Vertex AI  │
@@ -276,6 +347,24 @@ In production, the Electron app is a thin shell — it just opens the Vercel-hos
 └─────────────┘
 ```
 
-- **Browser** only talks to `/api/*` routes and Firebase
+### Live Video Tutor
+```
+┌─────────────┐   WebSocket     ┌──────────────────┐  WebSocket   ┌──────────────┐
+│   Browser    │ ──────────────→│  hx-core proxy   │────────────→ │ Vertex AI    │
+│   /live page │ ←──────────────│  (Cloud Run)     │←──────────── │ Gemini Live  │
+│              │  audio/video   │  + Auth header   │  audio/text  │ API          │
+│              │  + transcript  │                  │              │              │
+└──────────────┘                └──────────────────┘              └──────────────┘
+       │
+       │ POST /api/live-token
+       ▼
+┌──────────────────┐
+│  Next.js API     │  (returns proxy URL + project config)
+│  (Vercel)        │
+└──────────────────┘
+```
+
+- **Browser** only talks to `/api/*` routes, Firebase, and the hx-core WebSocket proxy
 - **API routes** handle all Vertex AI communication server-side
+- **WebSocket proxy** adds auth headers that browsers cannot set
 - **No credentials** are exposed to the client
