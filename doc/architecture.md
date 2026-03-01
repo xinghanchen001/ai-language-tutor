@@ -65,7 +65,7 @@ Corrects grammar, punctuation, and style for German or English text.
 ```
 User types text → Browser calls POST /api/correct
                 → Next.js API route (server-side)
-                → Vertex AI gemini-2.5-flash
+                → Vertex AI gemini-2.0-flash (europe-west4)
                 → Returns JSON: { corrected, mistakes, knowledge, detectedLanguage }
                 → Browser displays diff + error analysis + knowledge drops
                 → Result saved to Firestore
@@ -85,7 +85,7 @@ Breaks text into sentences and annotates vocabulary, grammar, idioms, and struct
 ```
 User types text → Browser calls POST /api/explain
                 → Next.js API route (server-side)
-                → Vertex AI gemini-2.5-flash
+                → Vertex AI gemini-2.0-flash (europe-west4)
                 → Returns JSON: { sentences[], detectedLanguage }
                 → Browser renders interactive word-level annotations
                 → Result saved to Firestore
@@ -122,7 +122,7 @@ Browser → @google/generative-ai SDK → generativelanguage.googleapis.com
 ```
 Browser → fetch('/api/correct') → Next.js API Route (server-side)
                                     → @google-cloud/vertexai SDK
-                                    → Vertex AI API (europe-west3)
+                                    → Vertex AI API (europe-west4)
                                     ↑
                               Service account auth (IAM)
                               No API key in browser
@@ -134,8 +134,8 @@ Browser → fetch('/api/correct') → Next.js API Route (server-side)
 |--------|--------|-------|
 | SDK | `@google/generative-ai` | `@google-cloud/vertexai` |
 | Auth | API key (client-side) | Service account (server-side) |
-| Endpoint | `generativelanguage.googleapis.com` | Vertex AI (`europe-west3`) |
-| Model | `gemini-1.5-flash` | `gemini-2.5-flash` |
+| Endpoint | `generativelanguage.googleapis.com` | Vertex AI (`europe-west4`) |
+| Model | `gemini-1.5-flash` | `gemini-2.0-flash` |
 | API calls | Browser → Google directly | Browser → API route → Vertex AI |
 | Rate limits | Free tier (15 RPM) | Billing-based (no free tier cap) |
 | Key exposure | Yes (NEXT_PUBLIC_) | No (server-side only) |
@@ -160,8 +160,8 @@ Vertex AI uses **GCP service account** authentication, not API keys. The code su
 
 ```
 GCP_PROJECT_ID=hx-core-488120
-GCP_LOCATION=europe-west3
-VERTEX_AI_MODEL=gemini-2.5-flash
+GCP_LOCATION=europe-west4
+VERTEX_AI_MODEL=gemini-2.0-flash
 GOOGLE_APPLICATION_CREDENTIALS=.gcloud/service-account.json
 ```
 
@@ -201,11 +201,11 @@ The web app is hosted on **Vercel** at: https://ai-language-tutor-six.vercel.app
 ### Architecture
 
 ```
-                     Vercel                          Google Cloud (europe-west3)
+                  Vercel (fra1)                     Google Cloud (europe-west4)
                     ┌─────────────────────┐         ┌─────────────────────────┐
                     │                     │         │                         │
 Browser ── HTTPS ──→│  Next.js (Vercel)   │── SDK ─→│  Vertex AI              │
-                    │  ├── Static pages   │         │  gemini-2.5-flash       │
+                    │  ├── Static pages   │         │  gemini-2.0-flash       │
                     │  └── API routes     │         │                         │
                     │     (serverless)    │         └─────────────────────────┘
                     └─────────────────────┘
@@ -221,8 +221,8 @@ Set these in **Vercel Dashboard → Settings → Environment Variables**:
 | Variable | Value | Notes |
 |----------|-------|-------|
 | `GCP_PROJECT_ID` | `hx-core-488120` | GCP project ID |
-| `GCP_LOCATION` | `europe-west3` | Vertex AI region |
-| `VERTEX_AI_MODEL` | `gemini-2.5-flash` | Model name |
+| `GCP_LOCATION` | `europe-west4` | Vertex AI region (Netherlands) |
+| `VERTEX_AI_MODEL` | `gemini-2.0-flash` | Model name |
 | `GCP_CREDENTIALS` | `(base64 string)` | Service account JSON, base64-encoded |
 
 **How to generate `GCP_CREDENTIALS`:**

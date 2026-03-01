@@ -1,4 +1,5 @@
-import { Menu, X, ClipboardPaste } from "lucide-react";
+import Link from "next/link";
+import { Menu, X, ClipboardPaste, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface HeaderProps {
@@ -91,6 +92,16 @@ export default function Header({
                         Explain
                     </button>
                 </div>
+
+                {/* Live Tutor Link */}
+                <Link
+                    href="/live"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold bg-green-500/20 text-green-300 border border-green-500/30 hover:bg-green-500/30 hover:text-green-200 transition-all"
+                    style={{ WebkitAppRegion: 'no-drag' } as any}
+                >
+                    <Video className="w-3.5 h-3.5" />
+                    <span className="hidden lg:inline">Live</span>
+                </Link>
 
                 {/* Auto Paste (Desktop Only) */}
                 <button
