@@ -52,6 +52,9 @@ export default function LivePage() {
 
   const isSessionActive = connectionStatus === "connected" || connectionStatus === "connecting";
 
+  // Screen sharing is not supported on iOS (no getDisplayMedia in any iOS browser)
+  const supportsScreenShare = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getDisplayMedia;
+
   // --- Auto-scroll transcripts ---
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -556,26 +559,28 @@ export default function LivePage() {
             )}
           </button>
 
-          {/* Screen share toggle */}
-          <button
-            onClick={toggleScreenShare}
-            disabled={!isSessionActive}
-            className={cn(
-              "p-3 rounded-2xl font-bold transition-all backdrop-blur-sm",
-              !isSessionActive && "opacity-40 cursor-not-allowed bg-white/10",
-              isSessionActive && !isScreenSharing &&
-                "bg-white/20 text-white hover:bg-white/30",
-              isSessionActive && isScreenSharing &&
-                "bg-purple-500/80 text-white hover:bg-purple-500"
-            )}
-            title={isScreenSharing ? "Switch to camera" : "Share screen"}
-          >
-            {isScreenSharing ? (
-              <Camera className="w-5 h-5" />
-            ) : (
-              <Monitor className="w-5 h-5" />
-            )}
-          </button>
+          {/* Screen share toggle — hidden on iOS (getDisplayMedia not supported) */}
+          {supportsScreenShare && (
+            <button
+              onClick={toggleScreenShare}
+              disabled={!isSessionActive}
+              className={cn(
+                "p-3 rounded-2xl font-bold transition-all backdrop-blur-sm",
+                !isSessionActive && "opacity-40 cursor-not-allowed bg-white/10",
+                isSessionActive && !isScreenSharing &&
+                  "bg-white/20 text-white hover:bg-white/30",
+                isSessionActive && isScreenSharing &&
+                  "bg-purple-500/80 text-white hover:bg-purple-500"
+              )}
+              title={isScreenSharing ? "Switch to camera" : "Share screen"}
+            >
+              {isScreenSharing ? (
+                <Camera className="w-5 h-5" />
+              ) : (
+                <Monitor className="w-5 h-5" />
+              )}
+            </button>
+          )}
 
           {/* Start/Stop button */}
           {!isSessionActive ? (
