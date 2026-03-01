@@ -528,89 +528,93 @@ export default function LivePage() {
             </div>
           )}
 
-          {/* Control Bar — overlaid at bottom of video */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-4 py-3 flex items-center justify-center gap-3">
-            {/* Mic toggle */}
-            <button
-              onClick={toggleMic}
-              disabled={!isSessionActive}
-              className={cn(
-                "p-3 rounded-2xl font-bold transition-all backdrop-blur-sm",
-                !isSessionActive && "opacity-40 cursor-not-allowed bg-white/10",
-                isSessionActive && !isMicMuted &&
-                  "bg-white/20 text-white hover:bg-white/30",
-                isSessionActive && isMicMuted &&
-                  "bg-red-500/80 text-white hover:bg-red-500"
-              )}
-              title={isMicMuted ? "Unmute microphone" : "Mute microphone"}
-            >
-              {isMicMuted ? (
-                <MicOff className="w-5 h-5" />
-              ) : (
-                <Mic className="w-5 h-5" />
-              )}
-            </button>
+        </div>
 
-            {/* Screen share toggle */}
-            <button
-              onClick={toggleScreenShare}
-              disabled={!isSessionActive}
-              className={cn(
-                "p-3 rounded-2xl font-bold transition-all backdrop-blur-sm",
-                !isSessionActive && "opacity-40 cursor-not-allowed bg-white/10",
-                isSessionActive && !isScreenSharing &&
-                  "bg-white/20 text-white hover:bg-white/30",
-                isSessionActive && isScreenSharing &&
-                  "bg-purple-500/80 text-white hover:bg-purple-500"
-              )}
-              title={isScreenSharing ? "Switch to camera" : "Share screen"}
-            >
-              {isScreenSharing ? (
-                <Camera className="w-5 h-5" />
-              ) : (
-                <Monitor className="w-5 h-5" />
-              )}
-            </button>
-
-            {/* Start/Stop button */}
-            {!isSessionActive ? (
-              <button
-                onClick={startSession}
-                className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all shadow-lg"
-              >
-                <Phone className="w-5 h-5" />
-                <span>Start Session</span>
-              </button>
-            ) : (
-              <button
-                onClick={stopSession}
-                className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all shadow-lg"
-              >
-                <PhoneOff className="w-5 h-5" />
-                <span>
-                  {connectionStatus === "connecting"
-                    ? "Connecting..."
-                    : "End Session"}
-                </span>
-              </button>
+        {/* Control Bar — above mobile transcript overlay, at bottom of video on desktop */}
+        <div
+          className="absolute left-0 right-0 z-30 bg-gradient-to-t from-black/60 to-transparent px-4 py-3 flex items-center justify-center gap-3 bottom-(--ctrl-bottom) md:bottom-[30%]"
+          style={{ '--ctrl-bottom': `${mobileTranscriptHeight}vh` } as React.CSSProperties}
+        >
+          {/* Mic toggle */}
+          <button
+            onClick={toggleMic}
+            disabled={!isSessionActive}
+            className={cn(
+              "p-3 rounded-2xl font-bold transition-all backdrop-blur-sm",
+              !isSessionActive && "opacity-40 cursor-not-allowed bg-white/10",
+              isSessionActive && !isMicMuted &&
+                "bg-white/20 text-white hover:bg-white/30",
+              isSessionActive && isMicMuted &&
+                "bg-red-500/80 text-white hover:bg-red-500"
             )}
+            title={isMicMuted ? "Unmute microphone" : "Mute microphone"}
+          >
+            {isMicMuted ? (
+              <MicOff className="w-5 h-5" />
+            ) : (
+              <Mic className="w-5 h-5" />
+            )}
+          </button>
 
-            {/* Camera indicator */}
-            <div
-              className={cn(
-                "p-3 rounded-2xl backdrop-blur-sm",
-                isCameraOn
-                  ? "bg-blue-500/30 text-white"
-                  : "bg-white/10 text-white/50"
-              )}
-              title="Camera"
+          {/* Screen share toggle */}
+          <button
+            onClick={toggleScreenShare}
+            disabled={!isSessionActive}
+            className={cn(
+              "p-3 rounded-2xl font-bold transition-all backdrop-blur-sm",
+              !isSessionActive && "opacity-40 cursor-not-allowed bg-white/10",
+              isSessionActive && !isScreenSharing &&
+                "bg-white/20 text-white hover:bg-white/30",
+              isSessionActive && isScreenSharing &&
+                "bg-purple-500/80 text-white hover:bg-purple-500"
+            )}
+            title={isScreenSharing ? "Switch to camera" : "Share screen"}
+          >
+            {isScreenSharing ? (
+              <Camera className="w-5 h-5" />
+            ) : (
+              <Monitor className="w-5 h-5" />
+            )}
+          </button>
+
+          {/* Start/Stop button */}
+          {!isSessionActive ? (
+            <button
+              onClick={startSession}
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-2xl font-bold hover:bg-green-700 transition-all shadow-lg"
             >
-              {isCameraOn ? (
-                <Video className="w-5 h-5" />
-              ) : (
-                <VideoOff className="w-5 h-5" />
-              )}
-            </div>
+              <Phone className="w-5 h-5" />
+              <span>Start Session</span>
+            </button>
+          ) : (
+            <button
+              onClick={stopSession}
+              className="flex items-center gap-2 px-6 py-3 bg-red-600 text-white rounded-2xl font-bold hover:bg-red-700 transition-all shadow-lg"
+            >
+              <PhoneOff className="w-5 h-5" />
+              <span>
+                {connectionStatus === "connecting"
+                  ? "Connecting..."
+                  : "End Session"}
+              </span>
+            </button>
+          )}
+
+          {/* Camera indicator */}
+          <div
+            className={cn(
+              "p-3 rounded-2xl backdrop-blur-sm",
+              isCameraOn
+                ? "bg-blue-500/30 text-white"
+                : "bg-white/10 text-white/50"
+            )}
+            title="Camera"
+          >
+            {isCameraOn ? (
+              <Video className="w-5 h-5" />
+            ) : (
+              <VideoOff className="w-5 h-5" />
+            )}
           </div>
         </div>
 
@@ -672,7 +676,7 @@ export default function LivePage() {
 
         {/* Mobile transcript overlay — draggable from bottom */}
         <div
-          className="md:hidden absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] flex flex-col"
+          className="md:hidden absolute bottom-0 left-0 right-0 z-20 bg-white rounded-t-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.15)] flex flex-col"
           style={{ height: `${mobileTranscriptHeight}vh` }}
         >
           {/* Drag handle */}
