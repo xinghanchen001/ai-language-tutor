@@ -105,11 +105,13 @@ export default function LivePage() {
     try {
       // 1. Get camera stream (separate from mic — mic is handled by MicrophoneCapture)
       const cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
+        video: { facingMode: "user" },
       });
       streamRef.current = cameraStream;
       if (videoRef.current) {
         videoRef.current.srcObject = cameraStream;
+        // Some mobile browsers need explicit play() even with autoPlay attribute
+        try { await videoRef.current.play(); } catch { /* already playing */ }
       }
       setIsCameraOn(true);
 
@@ -264,7 +266,7 @@ export default function LivePage() {
       // Switch back to camera
       try {
         const cameraStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: { facingMode: "user" },
         });
         // Stop old screen share tracks
         streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -295,7 +297,7 @@ export default function LivePage() {
           // Automatically switch back to camera
           setIsScreenSharing(false);
           navigator.mediaDevices
-            .getUserMedia({ video: true })
+            .getUserMedia({ video: { facingMode: "user" } })
             .then((cameraStream) => {
               streamRef.current = cameraStream;
               if (videoRef.current) {
