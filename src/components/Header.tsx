@@ -40,7 +40,8 @@ export default function Header({
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-                    className="md:hidden w-8 h-8 flex items-center justify-center text-blue-300 hover:bg-blue-900 hover:text-white rounded-lg transition-colors"
+                    title={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                    className="w-8 h-8 flex items-center justify-center text-blue-300 hover:bg-blue-900 hover:text-white rounded-lg transition-colors flex-shrink-0"
                     style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
                 >
                     {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
