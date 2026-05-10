@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import type { Annotation } from "@/types/gemini";
-import { BookOpen, Lightbulb, Sparkles, MessageSquare } from "lucide-react";
+import { BookOpen, Lightbulb, Sparkles, MessageSquare, ChevronDown } from "lucide-react";
+import SpeakerButton from "./SpeakerButton";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -155,6 +156,7 @@ export default function AnnotatedSentence({
     teacherComment
 }: AnnotatedSentenceProps) {
     const [expandedAnnotation, setExpandedAnnotation] = useState<number | null>(null);
+    const [showTeacherComment, setShowTeacherComment] = useState(false);
 
     const handleAnnotationClick = (index: number) => {
         setExpandedAnnotation(expandedAnnotation === index ? null : index);
@@ -162,8 +164,11 @@ export default function AnnotatedSentence({
 
     return (
         <div className="mb-6">
-            <div className="text-lg leading-relaxed text-slate-700 font-medium">
-                {renderAnnotatedText(sentence, annotations, handleAnnotationClick)}
+            <div className="flex gap-2 items-start">
+                <SpeakerButton text={sentence} className="mt-1" />
+                <div className="flex-1 text-lg leading-relaxed text-slate-700 font-medium">
+                    {renderAnnotatedText(sentence, annotations, handleAnnotationClick)}
+                </div>
             </div>
 
             <AnimatePresence>
@@ -186,7 +191,7 @@ export default function AnnotatedSentence({
                                 )}>
                                     {getAnnotationIcon(annotations[expandedAnnotation].type)}
                                 </div>
-                                <div>
+                                <div className="flex-1 min-w-0">
                                     <h4 className="font-bold text-slate-800 text-sm">
                                         "{annotations[expandedAnnotation].text}"
                                     </h4>
@@ -194,20 +199,25 @@ export default function AnnotatedSentence({
                                         {getAnnotationLabel(annotations[expandedAnnotation].type)}
                                     </p>
                                 </div>
+                                <SpeakerButton text={annotations[expandedAnnotation].text} size="sm" />
                             </div>
 
-                            <p className="text-lg leading-relaxed text-slate-700 font-medium mb-3">
-                                {annotations[expandedAnnotation].explanation}
-                            </p>
+                            <div className="flex gap-2 items-start mb-3">
+                                <p className="flex-1 text-lg leading-relaxed text-slate-700 font-medium">
+                                    {annotations[expandedAnnotation].explanation}
+                                </p>
+                                <SpeakerButton text={annotations[expandedAnnotation].explanation} size="sm" className="mt-0.5" />
+                            </div>
 
                             {annotations[expandedAnnotation].examples && annotations[expandedAnnotation].examples!.length > 0 && (
                                 <div className="mt-3 pt-3 border-t border-blue-200">
                                     <p className="text-xs font-bold text-slate-600 mb-2">Examples:</p>
-                                    <ul className="space-y-1">
+                                    <ul className="space-y-2">
                                         {annotations[expandedAnnotation].examples!.map((example, idx) => (
                                             <li key={idx} className="text-lg text-slate-600 flex items-start gap-2">
                                                 <span className="text-blue-400 mt-0.5">•</span>
                                                 <span className="flex-1">{example}</span>
+                                                <SpeakerButton text={example} size="sm" className="mt-0.5" />
                                             </li>
                                         ))}
                                     </ul>
@@ -222,19 +232,51 @@ export default function AnnotatedSentence({
             {simplifiedExpression && (
                 <div className="mt-3 bg-slate-50 rounded-xl p-4 border border-slate-100 flex gap-3 items-start">
                     <span className="text-xl flex-shrink-0 mt-0.5">💡</span>
-                    <p className="text-lg leading-relaxed text-slate-700 font-medium italic">
+                    <p className="flex-1 text-lg leading-relaxed text-slate-700 font-medium italic">
                         {simplifiedExpression}
                     </p>
+                    <SpeakerButton text={simplifiedExpression} size="sm" className="mt-0.5" />
                 </div>
             )}
 
-            {/* Teacher Comment */}
+            {/* Teacher Comment - collapsed by default */}
             {teacherComment && (
-                <div className="mt-3 bg-slate-50 rounded-xl p-4 border border-slate-100 flex gap-3 items-start">
-                    <span className="text-xl flex-shrink-0 mt-0.5">👨‍🏫</span>
-                    <p className="text-lg leading-relaxed text-slate-700 font-medium">
-                        {teacherComment}
-                    </p>
+                <div className="mt-3 bg-slate-50 rounded-xl border border-slate-100 overflow-hidden">
+                    <button
+                        type="button"
+                        onClick={() => setShowTeacherComment(!showTeacherComment)}
+                        className="w-full p-4 flex gap-3 items-center text-left hover:bg-slate-100 transition-colors"
+                        aria-expanded={showTeacherComment}
+                    >
+                        <span className="text-xl flex-shrink-0">👨‍🏫</span>
+                        <span className="flex-1 text-base font-medium text-slate-600">
+                            Teacher's note
+                        </span>
+                        <ChevronDown
+                            className={cn(
+                                "w-5 h-5 text-slate-400 flex-shrink-0 transition-transform",
+                                showTeacherComment && "rotate-180"
+                            )}
+                        />
+                    </button>
+                    <AnimatePresence initial={false}>
+                        {showTeacherComment && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="overflow-hidden"
+                            >
+                                <div className="px-4 pb-4 flex gap-3 items-start">
+                                    <p className="flex-1 text-lg leading-relaxed text-slate-700 font-medium">
+                                        {teacherComment}
+                                    </p>
+                                    <SpeakerButton text={teacherComment} size="sm" className="mt-0.5" />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             )}
         </div>

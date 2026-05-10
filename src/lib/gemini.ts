@@ -265,3 +265,64 @@ export async function chatWithAI(
 
   return responseText;
 }
+
+export type TranslateLang = "en" | "de" | "zh" | "auto";
+
+export interface TranslationResult {
+  translation: string;
+  detectedSourceLang: "en" | "de" | "zh";
+}
+
+const LANG_NAMES: Record<Exclude<TranslateLang, "auto">, string> = {
+  en: "English",
+  de: "German",
+  zh: "Chinese (Simplified)",
+};
+
+export async function translateText(
+  text: string,
+  targetLang: Exclude<TranslateLang, "auto">,
+  sourceLang: TranslateLang = "auto"
+): Promise<TranslationResult> {
+  if (!projectId) {
+    throw new Error("GCP_PROJECT_ID is missing.");
+  }
+
+  const sourceInstruction =
+    sourceLang === "auto"
+      ? "Detect the source language (must be one of: en, de, zh)."
+      : `The source language is ${LANG_NAMES[sourceLang]} (${sourceLang}).`;
+
+  const prompt = `You are a professional translator. Translate the following text into ${LANG_NAMES[targetLang]}.
+
+${sourceInstruction}
+
+Rules:
+- Produce a natural, fluent translation that preserves meaning, tone, and register.
+- Keep proper nouns, code, URLs, numbers, and formatting (line breaks, lists) intact.
+- Do not add commentary, notes, or explanations. Translate only.
+- If the source already equals the target language, return the text unchanged.
+
+Return strict JSON only (no markdown, no code fences):
+{
+  "detectedSourceLang": "en" | "de" | "zh",
+  "translation": "the translated text"
+}
+
+Text:
+"""
+${text}
+"""`;
+
+  const responseText = await retryWithBackoff(async () => {
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    if (!response.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error("Empty response from Vertex AI");
+    }
+    return response.candidates[0].content.parts[0].text;
+  });
+
+  const parsed = JSON.parse(responseText) as TranslationResult;
+  return parsed;
+}
